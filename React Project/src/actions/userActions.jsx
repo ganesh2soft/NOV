@@ -14,10 +14,14 @@ import {
 
 export const login = (userName, password) => async (dispatch) => {
   try {
-    console.log(userName,password)
+    console.log(userName, password);
     dispatch(loginRequest());
     const { data } = await axios
-      .post(process.env.REACT_APP_API_URL + `/auth/signin`, { userName, password }, { withCredentials: true })
+      .post(
+        process.env.REACT_APP_API_URL + `/auth/signin`,
+        { userName, password },
+        { withCredentials: true }
+      )
       .then((response) => {
         dispatch(loginSuccess({ user: response.data }));
       });
@@ -34,15 +38,22 @@ export const clearAuthError = (dispatch) => {
 export const register = (userData) => async (dispatch) => {
   try {
     dispatch(registerRequest());
-    const { data } = await axios.post(process.env.REACT_APP_API_URL + `/auth/signup`, userData, {
-      withCredentials: true,
-      headers: { "Content-Type": "application/json" },
-    });
+    console.log(process.env.REACT_APP_API_URL);
+    const { data } = await axios.post(
+      process.env.REACT_APP_API_URL + `/auth/signup`,
+      userData,
+      {
+        withCredentials: true,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
 
     dispatch(registerSuccess(data));
   } catch (error) {
     //dispatch(loginFailed(error.response.data.message));
-    dispatch(registerFailed(error.response?.data?.message || "Registration failed"));
+    dispatch(
+      registerFailed(error.response?.data?.message || "Registration failed")
+    );
   }
 };
 /*
@@ -52,14 +63,19 @@ is common through out the application
 export const loadUser = async (dispatch) => {
   try {
     dispatch(loadUserRequest());
-    const { data } = await axios.get(process.env.REACT_APP_API_URL + `/auth/user`, {
-      withCredentials: true,
-      headers: { "Content-Type": "application/json" },
-    });
+    const { data } = await axios.get(
+      process.env.REACT_APP_API_URL + `/auth/user`,
+      {
+        withCredentials: true,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
 
     dispatch(loadUserSuccess(data));
   } catch (error) {
     //dispatch(loginFailed(error.response.data.message));
-    dispatch(loadUserFailed(error.response?.data?.message || "Load user Failed"));
+    dispatch(
+      loadUserFailed(error.response?.data?.message || "Load user Failed")
+    );
   }
 };

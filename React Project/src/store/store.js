@@ -1,16 +1,14 @@
-import productsReducer from "../slices/productsSlice";
+import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "../slices/authSlice";
+import productsReducer from "../slices/productsSlice";
+import cartReducer from "../slices/cartSlice";
 
-const { combineReducers, configureStore } = require("@reduxjs/toolkit");
-
-const reducer = combineReducers({
-  productsState: productsReducer,
-  authState: authReducer,
-});
-
-//To create store
 const store = configureStore({
-  reducer // It will change our state
+  reducer: {
+    auth: authReducer,
+    products: productsReducer,
+    cart: cartReducer,
+  },
 });
 
 export default store;

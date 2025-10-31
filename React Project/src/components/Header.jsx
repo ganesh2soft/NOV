@@ -5,7 +5,7 @@ import { Dropdown, Image } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 
 export default function Header({ cartItems }) {
-  const { isAuthenticated, user } = useSelector((state) => state.authState);
+  const { isAuthenticated, user } = useSelector((state) => state.auth) || {};
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const logoutHandler = () => {
@@ -19,7 +19,12 @@ export default function Header({ cartItems }) {
         <div className="col-12 col-md-3">
           <div className="navbar-brand">
             <Link to="/">
-              <img src="/images/logo.png" height="50px" width="150px" alt="LOGO" />
+              <img
+                src="/images/logo.png"
+                height="50px"
+                width="150px"
+                alt="LOGO"
+              />
             </Link>
           </div>
         </div>
@@ -34,8 +39,13 @@ export default function Header({ cartItems }) {
           {/* Conditionally show buttons based on authentication */}
           {isAuthenticated ? (
             <Dropdown className="d-inline">
-              <Dropdown.Toggle variant="default text-white pr-5" id="dropdown-basic">
-                <span className="me-2 text-white">HELLO ! {user?.username || "Guest"} </span>
+              <Dropdown.Toggle
+                variant="default text-white pr-5"
+                id="dropdown-basic"
+              >
+                <span className="me-2 text-white">
+                  HELLO ! {user?.username || "Guest"}{" "}
+                </span>
                 <figure className="avatar avatar-nav">
                   <Image width="50px" src={user ?? "./images/profilepic.jpg"} />
                 </figure>
@@ -52,7 +62,10 @@ export default function Header({ cartItems }) {
             </Link>
           )}
 
-          <Link to={"/cart"} className="cart-link text-decoration-none text-light position-relative ms-3">
+          <Link
+            to={"/cart"}
+            className="cart-link text-decoration-none text-light position-relative ms-3"
+          >
             <div className="d-flex align-items-center">
               <i className="fa-solid fa-cart-shopping cart-icon"></i>
               <span className="cart-count">{cartItems.length}</span>

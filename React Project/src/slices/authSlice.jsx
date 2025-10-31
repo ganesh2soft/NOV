@@ -9,89 +9,71 @@ const authSlice = createSlice({
     error: null,
   },
   reducers: {
-    loginRequest(state, action) {
-      return {
-        ...state,
-        loading: true,
-        isAuthenticated: false,
-        error: null,
-      };
+    loginRequest: (state) => {
+      state.loading = true;
+      state.isAuthenticated = false;
+      state.error = null;
     },
-    loginSuccess(state, action) {
-      return {
-        loading: false,
-        isAuthenticated: true,
-        user: action.payload.user,
-        error: null,
-      };
+    loginSuccess: (state, action) => {
+      state.loading = false;
+      state.isAuthenticated = true;
+      state.user = action.payload.user;
+      state.error = null;
     },
-    loginFailed(state, action) {
-      return {
-        ...state,
-        loading: false,
-        error: action.payload.error,
-      };
+    loginFailed: (state, action) => {
+      state.loading = false;
+      state.error = action.payload.error;
     },
-    clearError(state, action) {
-      return {
-        ...state,
-        error: null,
-      };
+    registerRequest: (state) => {
+      state.loading = true;
+      state.error = null;
     },
-    registerRequest(state, action) {
-      return {
-        ...state,
-        loading: true,
-      };
+    registerSuccess: (state, action) => {
+      state.loading = false;
+      state.isAuthenticated = false;
+      state.user = action.payload.user;
     },
-    registerSuccess(state, action) {
-      return {
-        loading: false,
-        isAuthenticated: false, // still user need to login
-        user: action.payload.user,
-      };
+    registerFailed: (state, action) => {
+      state.loading = false;
+      state.error = action.payload.error;
     },
-    registerFailed(state, action) {
-      return {
-        ...state,
-        loading: false,
-        error: action.payload.error,
-      };
+    loadUserRequest: (state) => {
+      state.loading = true;
+      state.isAuthenticated = false;
     },
-    loadUserRequest(state, action) {
-      return {
-        ...state,
-        loading: true,
-        isAuthenticated: false,
-      };
+    loadUserSuccess: (state, action) => {
+      state.loading = false;
+      state.isAuthenticated = true;
+      state.user = action.payload.user;
     },
-    loadUserSuccess(state, action) {
-      return {
-        loading: false,
-        isAuthenticated: true,
-        user: action.payload.user,
-      };
+    loadUserFailed: (state, action) => {
+      state.loading = false;
+      state.error = action.payload.error;
     },
-    loadUserFailed(state, action) {
-      return {
-        ...state,
-        loading: false,
-        error: action.payload.error,
-      };
+    clearError: (state) => {
+      state.error = null;
+    },
+    logout: (state) => {
+      state.loading = false;
+      state.isAuthenticated = false;
+      state.user = null;
+      state.error = null;
     },
   },
 });
-const { actions, reducer } = authSlice;
+
 export const {
   loginRequest,
   loginSuccess,
   loginFailed,
-  clearError,
   registerRequest,
   registerSuccess,
   registerFailed,
   loadUserRequest,
   loadUserSuccess,
   loadUserFailed,
-} = actions;
-export default reducer;
+  clearError,
+  logout,
+} = authSlice.actions;
+
+export default authSlice.reducer;

@@ -8,6 +8,7 @@ export default function Home() {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
+    console.log("Fetching all ", process.env.REACT_APP_API_URL);
     fetch(process.env.REACT_APP_API_URL + "/public/products")
       .then((res) => res.json())
       .then((data) => setProducts(data))
@@ -18,7 +19,9 @@ export default function Home() {
     const queryString = searchParams.toString(); // "keyword=abc"
     if (!queryString) return; // skip if no search
 
-    fetch(`${process.env.REACT_APP_API_URL}/public/products/search?${queryString}`)
+    fetch(
+      `${process.env.REACT_APP_API_URL}/public/products/search?${queryString}`
+    )
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setProducts(data);
