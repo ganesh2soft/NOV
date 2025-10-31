@@ -134,7 +134,7 @@ export default function Cart() {
             <hr />
             <button
               id="checkout_btn"
-              onClick={() => navigate("/checkout")}
+              onClick={() => navigate("/ordersuccess")}
               className="btn btn-primary btn-block"
             >
               Proceed to Buy{" "}

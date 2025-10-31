@@ -54,79 +54,76 @@ public class CartServiceImpl implements CartService {
      */
     @Override
     public CartDTO addProductsToCart(Long productId, Integer quantity) {
-        // Get logged-in user
+        // 1. Get logged-in user
         Users user = usersService.getLoggedInUser();
 
-        // Get user's cart or create new
+        // 2. Get or create user's cart
         Cart cart = cartRepository.findByUser(user);
         if (cart == null) {
             cart = new Cart();
             cart.setUser(user);
             cart.setTotalPrice(0.0);
-            cartRepository.save(cart);
         }
 
-        // Get product
+        // 3. Get product
         Products product = productsRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
 
-        // Check stock
-
-
+        // 4. Check stock and regenerate if needed
         if (product.getQuantity() < quantity) {
-            // If stock is 0, try to regenerate from InventoryService
             if (product.getQuantity() == 0) {
-                int regeneratedStock;
                 try {
-                    regeneratedStock = stockClient.generateStock();
+                    int regeneratedStock = stockClient.generateStock();
+                    product.setQuantity(regeneratedStock);
                 } catch (Exception e) {
                     throw new OutOfStockException(product.getProductName(), quantity, product.getQuantity());
                 }
-
-                product.setQuantity(regeneratedStock);
-                productsRepository.save(product); // Save updated stock
             }
 
-            // Re-check after regeneration
             if (product.getQuantity() < quantity) {
                 throw new OutOfStockException(product.getProductName(), quantity, product.getQuantity());
             }
         }
 
-        //product.setQuantity(generatedStock);
-
-
-        // Check if product already exists in cart
-        CartItem existingItem = cartItemRepository.findCartItemByProductIdAndCartId(cart.getCartId(), productId);
-        if (existingItem != null) {
-            existingItem.setQuantity(existingItem.getQuantity() + quantity);
-            cartItemRepository.save(existingItem);
+        // 5. Add or update cart item
+        CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartId(cart.getCartId(), productId);
+        if (cartItem != null) {
+            cartItem.setQuantity(cartItem.getQuantity() + quantity);
         } else {
-            CartItem newItem = new CartItem();
-            newItem.setCart(cart);
-            newItem.setProduct(product);
-            newItem.setQuantity(quantity);
-            newItem.setProductPrice(product.getSpecialPrice());
-            newItem.setDiscount(product.getDiscount());
-            cartItemRepository.save(newItem);
+            cartItem = new CartItem();
+            cartItem.setCart(cart);
+            cartItem.setProduct(product);
+            cartItem.setQuantity(quantity);
+            cartItem.setProductPrice(product.getSpecialPrice());
+            cartItem.setDiscount(product.getDiscount());
+            cart.getCartItems().add(cartItem); // ensure bidirectional mapping
         }
 
-        // Update total and stock
+        // 6. Update product stock and cart total
         product.setQuantity(product.getQuantity() - quantity);
-        cart.setTotalPrice(cart.getTotalPrice() + (product.getSpecialPrice() * quantity));
+        double totalPrice = cart.getTotalPrice() + (product.getSpecialPrice() * quantity);
+        cart.setTotalPrice(totalPrice);
+
+        // 7. Save entities
         productsRepository.save(product);
         cartRepository.save(cart);
+        cartItemRepository.save(cartItem);
 
-        // Convert to DTO
+        // 8. Convert to DTO
         CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
         List<ProductDTO> productsDTO = cart.getCartItems()
                 .stream()
-                .map(ci -> modelMapper.map(ci.getProduct(), ProductDTO.class))
+                .map(ci -> {
+                    ProductDTO dto = modelMapper.map(ci.getProduct(), ProductDTO.class);
+                    dto.setQuantity(ci.getQuantity()); // include cart quantity
+                    return dto;
+                })
                 .collect(Collectors.toList());
         cartDTO.setProducts(productsDTO);
 
         return cartDTO;
     }
+
 
     /**
      * Get all carts (admin)

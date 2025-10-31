@@ -43,7 +43,7 @@ function App() {
             />
 
             <Route
-              path="/order-success"
+              path="/ordersuccess"
               element={
                 <ProtectedRoute>
                   <OrderSuccess />

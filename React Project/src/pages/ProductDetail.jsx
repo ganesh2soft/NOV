@@ -9,9 +9,10 @@ export default function ProductDetails() {
   const navigate = useNavigate();
 
   const { isAuthenticated } = useSelector((state) => state.auth);
-  const { cartItems, loading } = useSelector((state) => state.cart);
+  const { loading } = useSelector((state) => state.cart);
 
   const [product, setProduct] = useState(null);
+  const [quantity, setQuantity] = useState(1);
 
   // Fetch product details from API
   useEffect(() => {
@@ -29,6 +30,10 @@ export default function ProductDetails() {
     getProduct();
   }, [id]);
 
+  // Quantity handlers
+  const increaseQty = () => setQuantity((prev) => prev + 1);
+  const decreaseQty = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+
   // Handle add to cart
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
@@ -36,9 +41,17 @@ export default function ProductDetails() {
       return;
     }
 
-    // Default quantity is 1
-    await dispatch(addToCart({ productId: product.id, qty: 1 }));
-    dispatch(fetchCart()); // refresh cart after adding
+    try {
+      // Wait for addToCart thunk to finish
+      await dispatch(addToCart({ productId: product.id, quantity })).unwrap();
+      // Refresh cart
+      dispatch(fetchCart());
+      // Forward to success page
+      navigate("/ordersuccess");
+    } catch (err) {
+      console.error("Failed to add to cart:", err);
+      alert("Could not add product to cart. Please try again.");
+    }
   };
 
   if (!product) return <h2>Loading product...</h2>;
@@ -65,6 +78,18 @@ export default function ProductDetails() {
           <p>{product.description}</p>
           <h4>₹{product.specialPrice}</h4>
 
+          {/* Quantity selector */}
+          <div className="d-flex align-items-center my-3">
+            <button className="btn btn-secondary" onClick={decreaseQty}>
+              -
+            </button>
+            <span className="mx-2">{quantity}</span>
+            <button className="btn btn-secondary" onClick={increaseQty}>
+              +
+            </button>
+          </div>
+
+          {/* Add to Cart button */}
           <button
             disabled={loading}
             onClick={handleAddToCart}
